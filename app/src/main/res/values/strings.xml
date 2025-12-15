@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Talabat</string>
+    <string name="search_hint">Search for restaurants or dishes</string>
+    <string name="order_again">Order Again</string>
+    <string name="all_restaurants">All Restaurants</string>
+    <string name="add_to_basket">Add to Basket</string>
+    <string name="view_basket">View Basket</string>
+    <string name="place_order">Place Order</string>
+    <string name="currency">EGP</string>
+    <string name="title_activity_menu">Menu</string>
+</resources>
