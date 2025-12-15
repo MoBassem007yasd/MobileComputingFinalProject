@@ -138,6 +138,15 @@ fun AdminDriversScreen(dao: AppDao) {
             Spacer(Modifier.width(8.dp))
             Button(onClick = {
                 scope.launch {
+                    if (name.isBlank()) {
+                        withContext(Dispatchers.Main) {
+                        }
+                        return@launch
+                    }
+                    val exists = dao.checkDriverNameExists(name)
+                    if (exists > 0) {
+                        return@launch
+                    }
                     withContext(Dispatchers.IO) {
                         val newDriver = Driver(name = name, deliveriesCount = 0, isBusy = false)
                         dao.insertDriver(newDriver)
@@ -226,13 +235,13 @@ fun AdminRestaurantsScreen(dao: AppDao) {
 @Composable
 fun RestaurantDialog(dao: AppDao, restaurantToEdit: Restaurant?, onDismiss: () -> Unit) {
     var name by remember { mutableStateOf(restaurantToEdit?.name ?: "") }
-    var category by remember { mutableStateOf(restaurantToEdit?.category ?: "Oriental") }
+    var category by remember { mutableStateOf(restaurantToEdit?.category ?: "") }
     var deliveryFee by remember { mutableStateOf(restaurantToEdit?.deliveryFee?.toString() ?: "") }
     var deliveryTime by remember { mutableStateOf(restaurantToEdit?.deliveryTime ?: "") }
     var imageUri by remember { mutableStateOf<Uri?>(restaurantToEdit?.imageUri?.let { Uri.parse(it) }) }
     val scope = rememberCoroutineScope()
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? -> imageUri = uri }
-
+    val existingCategories by dao.getRestaurantCategories().collectAsState(initial = emptyList())
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (restaurantToEdit == null) "Add Restaurant" else "Edit Restaurant") },
@@ -242,11 +251,26 @@ fun RestaurantDialog(dao: AppDao, restaurantToEdit: Restaurant?, onDismiss: () -
                 OutlinedTextField(value = deliveryFee, onValueChange = { deliveryFee = it }, label = { Text("Fee (EGP)") })
                 OutlinedTextField(value = deliveryTime, onValueChange = { deliveryTime = it }, label = { Text("Time (e.g. 30 mins)") })
                 Spacer(Modifier.height(8.dp))
-                Text("Category:", fontWeight = FontWeight.Bold)
-                Row {
-                    listOf("Oriental", "Dessert", "Chicken").forEach { cat ->
-                        FilterChip(selected = category == cat, onClick = { category = cat }, label = { Text(cat) })
-                        Spacer(Modifier.width(4.dp))
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = { category = it },
+                    label = { Text("Category (e.g. Oriental)") },
+                    placeholder = { Text("Type new or select below") }
+                )
+                if (existingCategories.isNotEmpty()) {
+                    Spacer(Modifier.height(4.dp))
+                    Text("Select existing:", fontSize = 12.sp, color = Color.Gray)
+                    LazyRow {
+                        items(existingCategories) { cat ->
+                            if(cat.isNotBlank()) {
+                                FilterChip(
+                                    selected = category == cat,
+                                    onClick = { category = cat },
+                                    label = { Text(cat) },
+                                    modifier = Modifier.padding(end = 4.dp)
+                                )
+                            }
+                        }
                     }
                 }
                 Spacer(Modifier.height(8.dp))
@@ -341,6 +365,10 @@ fun ManageMenuDialog(dao: AppDao, restaurant: Restaurant, onDismiss: () -> Unit)
                         scope.launch {
                             val price = itemPrice.toDoubleOrNull() ?: 0.0
                             if (itemName.isNotEmpty()) {
+                                val exists = dao.checkMenuItemExists(restaurant.id, itemName)
+                                if (exists > 0) {
+                                    return@launch
+                                }
                                 val finalCategory = if (itemCategory.isNotBlank()) itemCategory else "General"
 
                                 dao.insertMenuItem(MenuItem(

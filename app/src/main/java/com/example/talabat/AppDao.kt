@@ -8,6 +8,12 @@ interface AppDao {
     @Query("SELECT * FROM restaurants")
     fun getAllRestaurants(): Flow<List<Restaurant>>
 
+    @Query("SELECT COUNT(*) FROM restaurants WHERE name = :name")
+    suspend fun checkRestaurantNameExists(name: String): Int
+
+    @Query("SELECT DISTINCT category FROM restaurants")
+    fun getRestaurantCategories(): Flow<List<String>>
+
     @Query("SELECT COUNT(*) FROM restaurants")
     suspend fun getRestaurantCount(): Int
 
@@ -32,6 +38,9 @@ interface AppDao {
     suspend fun removeUserFavorite(fav: UserFavorite)
     @Query("SELECT * FROM menu_items WHERE restaurantId = :restId")
     fun getMenuForRestaurant(restId: Int): Flow<List<MenuItem>>
+
+    @Query("SELECT COUNT(*) FROM menu_items WHERE restaurantId = :restId AND name = :name")
+    suspend fun checkMenuItemExists(restId: Int, name: String): Int
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertMenuItem(item: MenuItem)
@@ -89,6 +98,9 @@ interface AppDao {
 
     @Query("SELECT * FROM drivers")
     fun getAllDrivers(): Flow<List<Driver>>
+
+    @Query("SELECT COUNT(*) FROM drivers WHERE name = :name")
+    suspend fun checkDriverNameExists(name: String): Int
 
     @Query("SELECT * FROM drivers WHERE isBusy = 0 LIMIT 1")
     suspend fun getAvailableDriver(): Driver?

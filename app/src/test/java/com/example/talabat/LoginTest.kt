@@ -1,14 +1,15 @@
 package com.example.talabat
 
-import org.junit.Test
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
+import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import kotlinx.coroutines.runBlocking
 
 class LoginTest {
+
     @Mock
     lateinit var dao: AppDao
 
@@ -18,14 +19,14 @@ class LoginTest {
     }
 
     @Test
-    fun `login with correct admin credentials returns success`() = runBlocking {
+    fun `login with correct admin credentials returns success`() = runTest {
         val email = "admin"
-        val mockUser = User("admin", "123", isAdmin = true)
+        val mockUser = User(email, "123", isAdmin = true)
         `when`(dao.getUser(email)).thenReturn(mockUser)
-
         val user = dao.getUser(email)
-        assertNotNull(user)
+
+        assertNotNull("User should not be null", user)
         assertEquals("123", user?.password)
-        assertTrue(user!!.isAdmin)
+        assertTrue("User should be admin", user!!.isAdmin)
     }
 }

@@ -17,7 +17,6 @@ class RestaurantFilterTest {
         val result = filterHelper.filterRestaurants(sampleRestaurants) {
             it.category == "Dessert"
         }
-
         assertEquals(1, result.size)
         assertEquals("La Poire", result[0].name)
     }
@@ -27,7 +26,6 @@ class RestaurantFilterTest {
         val result = filterHelper.filterRestaurants(sampleRestaurants) {
             it.name.contains("Chicken", ignoreCase = true)
         }
-
         assertEquals(1, result.size)
         assertEquals("Apache Chicken", result[0].name)
     }
@@ -37,7 +35,6 @@ class RestaurantFilterTest {
         val result = filterHelper.filterRestaurants(sampleRestaurants) {
             it.name.contains("Pizza", ignoreCase = true)
         }
-
         assertEquals(0, result.size)
     }
 }

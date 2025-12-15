@@ -39,18 +39,19 @@ class MainActivity : ComponentActivity() {
                 val currentTime = System.currentTimeMillis()
                 val drivers = dao.getDriversSync()
                 val orders = dao.getAllOrdersSync()
-
+                // .filter, .forEach, .find process the data in RAM
                 val busyDrivers = drivers.filter { it.isBusy }
-
                 busyDrivers.forEach { driver ->
                     val lastOrder = orders.find { it.driverName == driver.name }
 
                     if (lastOrder != null) {
                         val timeElapsed = currentTime - lastOrder.orderTime
-                        if (timeElapsed > 90000) {
+                        if (timeElapsed > 60000) {
                             dao.updateDriver(driver.copy(isBusy = false))
                         }
-                    } else {
+                    }
+                    // If an order was deleted (because of deletion of its restaurant) from the database but the driver remained stuck as "Busy."
+                    else {
                         dao.updateDriver(driver.copy(isBusy = false))
                     }
                 }
@@ -302,6 +303,10 @@ fun LoginScreen(dao: AppDao, onLoginSuccess: (String, Boolean) -> Unit) {
         Button(
             onClick = {
                 scope.launch {
+                    if (email.isBlank() || password.isBlank()) {
+                        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                        return@launch
+                    }
                     if (isRegistering) {
                         val existingUser = dao.getUser(email)
                         if (existingUser != null) {

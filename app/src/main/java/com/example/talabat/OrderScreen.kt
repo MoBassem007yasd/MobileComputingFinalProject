@@ -51,8 +51,6 @@ fun OrdersScreen(dao: AppDao) {
     val session = SessionManager(context)
     val userEmail = session.getUserEmail() ?: ""
     val orders by dao.getOrdersForUser(userEmail).collectAsState(initial = emptyList())
-
-    // FIX: Changed mutableLongStateOf -> mutableStateOf to resolve import/type errors
     var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
 
     LaunchedEffect(Unit) {

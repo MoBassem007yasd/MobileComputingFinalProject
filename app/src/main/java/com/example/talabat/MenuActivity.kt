@@ -59,7 +59,11 @@ class MenuActivity : ComponentActivity() {
                     if (basketItems.isNotEmpty()) {
                         val total = basketItems.sumOf { it.price * it.quantity }
                         Button(
-                            onClick = { startActivity(Intent(this, BasketActivity::class.java)) },
+                            onClick = {
+                                val intent = Intent(this, BasketActivity::class.java)
+                                intent.putExtra("SOURCE_REST_ID", restId)
+                                startActivity(intent)
+                            },
                             modifier = Modifier.fillMaxWidth().padding(16.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
                         ) {
